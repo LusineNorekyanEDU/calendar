@@ -1,0 +1,54 @@
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 12px;
+}
+
+.nav-btn {
+    padding: 6px 10px;
+    border: 1px solid #bbb;
+    background: white;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.title-block {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+}
+
+.month-year {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+}
+
+.month-name {
+    background: var(--header-bg);
+    border-radius: 6px;
+    padding: 6px 12px;
+    border: 1px solid #c9c9c9;
+    font-weight: bold;
+    font-size: 22px;
+}
+
+.year {
+    font-size: 18px;
+}
+
+.controls {
+    display: flex;
+    gap: 8px;
+}
+
+.month-select,
+.today-btn {
+    padding: 6px 10px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    cursor: pointer;
+}

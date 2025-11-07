@@ -1,0 +1,64 @@
+.calendar-root {
+    width: 100%;
+    border: 4px solid #111;
+    padding: 30px 50px;
+    background: white;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+.calendar-viewport {
+    position: relative;
+    min-height: 420px;
+    overflow: hidden;
+}
+
+.calendar-panel {
+    width: 100%;
+    transition: transform 300ms ease, opacity 300ms ease;
+}
+
+.calendar-panel.incoming {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.calendar-panel.animating.slide-left {
+    transform: translateX(-100%);
+    opacity: 0;
+}
+.calendar-panel.animating.slide-right {
+    transform: translateX(100%);
+    opacity: 0;
+}
+
+.incoming-left {
+    transform: translateX(100%);
+    animation: incomingFromRight 300ms forwards ease;
+}
+.incoming-right {
+    transform: translateX(-100%);
+    animation: incomingFromLeft 300ms forwards ease;
+}
+
+@keyframes incomingFromRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0%);
+        opacity: 1;
+    }
+}
+
+@keyframes incomingFromLeft {
+    from {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0%);
+        opacity: 1;
+    }
+}

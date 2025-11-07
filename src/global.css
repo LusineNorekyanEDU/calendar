@@ -1,0 +1,32 @@
+:root {
+    --accent: #e39bd6;
+    --header-bg: #ffd6e8;
+    --weekday-bg: #f7f2f8;
+    --sun-bg: #ffd6e8;
+    --sat-bg: #ffd6e8;
+    --today: #ffd54f;
+    --event-dot: #b24fb2;
+    --cell-border: #aaa;
+}
+
+.app-root {
+    font-family: "Segoe UI", Roboto, Arial, sans-serif;
+    padding: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+.title {
+    font-family: "Segoe UI", "Bradley Hand", cursive;
+    font-size: 48px;
+    margin: 0;
+    letter-spacing: 2px;
+}
+
+@media (max-width: 720px) {
+    .title {
+        font-size: 36px;
+    }
+}
