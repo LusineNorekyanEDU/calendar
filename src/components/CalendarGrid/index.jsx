@@ -1,67 +1,55 @@
+// src/components/CalendarGrid/index.jsx
 import React from "react";
 import CalendarCell from "../CalendarCell";
+import { formatDateKeyFromParts } from "./utils";
 import "./styles.css";
+import { useSelector, useDispatch } from "react-redux";
+import { openModalForDay } from "../../store/calendarSlice";
 
-/**
- * CalendarGrid: builds grid for given month/year and renders CalendarCell components.
- *
- * Props:
- * - month (0-11)
- * - year (full year)
- * - onDayClick(dayNumber)
- * - events: map of events keyed by "YYYY-MM-DD"
- */
 function padArray(count) {
     return new Array(count).fill(null);
 }
 
-function getDaysInMonth(year, month) {
+function daysInMonth(year, month) {
     return new Date(year, month + 1, 0).getDate();
 }
 
-export default function CalendarGrid({ month, year, onDayClick, events = {} }) {
-    const daysOfWeek = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+export default function CalendarGrid() {
+    const dispatch = useDispatch();
+    const calendarState = useSelector((s) => s.calendar);
+    const displayed = new Date(calendarState.displayedDateIso);
+    const month = displayed.getMonth();
+    const year = displayed.getFullYear();
+    const events = calendarState.events || {};
 
     const firstDayIndex = new Date(year, month, 1).getDay();
-    const totalDays = getDaysInMonth(year, month);
+    const totalDays = daysInMonth(year, month);
 
-    const cells = [
-        ...padArray(firstDayIndex),
-        ...Array.from({ length: totalDays }, (_, i) => i + 1)
-    ];
-
-    const formatKey = (year, month, day) => {
-        const mm = String(month + 1).padStart(2, "0");
-        const dd = String(day).padStart(2, "0");
-        return `${year}-${mm}-${dd}`;
-    };
+    const cells = [...padArray(firstDayIndex), ...Array.from({ length: totalDays }, (_, i) => i + 1)];
 
     return (
         <div className="calendar-grid">
             <div className="dow-row">
-                {daysOfWeek.map((dayLabel) => (
-                    <div
-                        key={dayLabel}
-                        className={`dow-cell ${
-                            dayLabel === "Sun" ? "sun" : dayLabel === "Sat" ? "sat" : ""
-                        }`}
-                    >
-                        {dayLabel}
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((dow) => (
+                    <div key={dow} className={`dow-cell ${dow === "Sun" ? "sun" : dow === "Sat" ? "sat" : ""}`}>
+                        {dow}
                     </div>
                 ))}
             </div>
 
             <div className="cells">
-                {cells.map((dayNumber, index) => {
-                    const key = dayNumber ? formatKey(year, month, dayNumber) : `empty-${index}`;
-                    const hasEvents = dayNumber ? !!events[key] : false;
+                {cells.map((day, i) => {
+                    const key = day ? formatDateKeyFromParts(year, month, day) : `empty-${i}`;
+                    const hasEvents = day ? !!events[key] : false;
+                    const weekDay = (i + firstDayIndex) % 7;
+
                     return (
                         <CalendarCell
                             key={key}
-                            day={dayNumber}
+                            day={day}
                             hasEvents={hasEvents}
-                            onClick={() => onDayClick(dayNumber)}
-                            weekDay={(index + firstDayIndex) % 7}
+                            onClick={() => dispatch(openModalForDay(day))}
+                            weekDay={weekDay}
                         />
                     );
                 })}

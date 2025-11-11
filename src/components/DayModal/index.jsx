@@ -1,20 +1,9 @@
+// src/components/DayModal/index.jsx
 import React, { useState } from "react";
 import "./styles.css";
-
-/**
- * DayModal:
- * Props:
- *  - date (Date)
- *  - events (array)
- *  - onClose()
- *  - onAdd(text)
- *  - onDelete(id)
- *
- * Note: This component intentionally keeps the same behavior as original:
- * - clicking overlay closes modal
- * - clicking inside modal stops propagation
- * - add and delete handlers call callbacks passed from parent
- */
+import { useSelector, useDispatch } from "react-redux";
+import { addEvent, deleteEvent, closeModal } from "../../store/calendarSlice";
+import { formatDateKey } from "../Calendar/utils";
 
 function niceDate(date) {
     return date.toLocaleDateString(undefined, {
@@ -25,41 +14,47 @@ function niceDate(date) {
     });
 }
 
-export default function DayModal({ date, events = [], onClose, onAdd, onDelete }) {
+export default function DayModal() {
+    const dispatch = useDispatch();
+    const calendarState = useSelector((s) => s.calendar);
+    const modalDateIso = calendarState.modalDateIso;
+    const modalDate = modalDateIso ? new Date(modalDateIso) : null;
+    const eventsMap = calendarState.events || {};
     const [text, setText] = useState("");
+
+    const eventsForDay = modalDate ? eventsMap[formatDateKey(modalDate)] || [] : [];
 
     const handleAdd = () => {
         const trimmed = text.trim();
-        if (!trimmed) return;
-        onAdd(trimmed);
+        if (!trimmed || !modalDateIso) return;
+        dispatch(addEvent(modalDateIso, trimmed));
         setText("");
     };
 
+    const handleDelete = (id) => {
+        if (!modalDateIso) return;
+        dispatch(deleteEvent(modalDateIso, id));
+    };
+
+    if (!modalDate) return null;
+
     return (
-        <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-overlay" onClick={() => dispatch(closeModal())}>
             <div className="modal" onClick={(e) => e.stopPropagation()}>
                 <div className="modal-header">
-                    <h3>{niceDate(date)}</h3>
-                    <button className="close" onClick={onClose} aria-label="Close modal">
-                        ✕
-                    </button>
+                    <h3>{niceDate(modalDate)}</h3>
+                    <button className="close" onClick={() => dispatch(closeModal())} aria-label="Close modal">✕</button>
                 </div>
 
                 <div className="modal-body">
                     <div className="existing-events">
                         <h4>Events</h4>
-                        {events.length === 0 && <div className="no-events">No events for this day</div>}
+                        {eventsForDay.length === 0 && <div className="no-events">No events for this day</div>}
                         <ul>
-                            {events.map((eventItem) => (
+                            {eventsForDay.map((eventItem) => (
                                 <li key={eventItem.id} className="event-item">
                                     <span>{eventItem.text}</span>
-                                    <button
-                                        className="delete-event"
-                                        onClick={() => onDelete(eventItem.id)}
-                                        aria-label={`Delete event ${eventItem.id}`}
-                                    >
-                                        Delete
-                                    </button>
+                                    <button className="delete-event" onClick={() => handleDelete(eventItem.id)}>Delete</button>
                                 </li>
                             ))}
                         </ul>
@@ -73,12 +68,8 @@ export default function DayModal({ date, events = [], onClose, onAdd, onDelete }
                             placeholder="Write a short note..."
                         />
                         <div className="modal-actions">
-                            <button onClick={handleAdd} className="add-btn">
-                                Add
-                            </button>
-                            <button onClick={onClose} className="cancel-btn">
-                                Close
-                            </button>
+                            <button onClick={handleAdd} className="add-btn">Add</button>
+                            <button onClick={() => dispatch(closeModal())} className="cancel-btn">Close</button>
                         </div>
                     </div>
                 </div>

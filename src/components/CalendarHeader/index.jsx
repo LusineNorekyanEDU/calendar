@@ -1,4 +1,7 @@
+// src/components/CalendarHeader/index.jsx
 import React from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { goToPreviousMonth, goToNextMonth, goToSpecificMonth, goToToday } from "../../store/calendarSlice";
 import "./styles.css";
 
 const monthNames = [
@@ -6,27 +9,43 @@ const monthNames = [
     "July", "August", "September", "October", "November", "December"
 ];
 
-export default function CalendarHeader({ month, year, onPrev, onNext, onSelectMonth, onToday }) {
+export default function CalendarHeader() {
+    const dispatch = useDispatch();
+    const displayedIso = useSelector((s) => s.calendar.displayedDateIso);
+    const displayed = new Date(displayedIso);
+    const month = displayed.getMonth();
+    const year = displayed.getFullYear();
+
     return (
         <div className="calendar-header">
-            <button className="nav-btn" onClick={onPrev}>← Prev</button>
+            <div className="nav-left">
+                <button className="nav-btn" onClick={() => dispatch(goToPreviousMonth())}>← Prev</button>
+            </div>
 
             <div className="title-block">
                 <div className="month-year">
                     <span className="month-name">{monthNames[month]}</span>
                     <span className="year">{year}</span>
                 </div>
+
                 <div className="controls">
-                    <select className="month-select" value={month} onChange={(e) => onSelectMonth(parseInt(e.target.value))}>
-                        {monthNames.map((name, index) => (
-                            <option key={name} value={index}>{name}</option>
+                    <select
+                        className="month-select"
+                        value={month}
+                        onChange={(e) => dispatch(goToSpecificMonth(parseInt(e.target.value)))}
+                    >
+                        {monthNames.map((m, i) => (
+                            <option key={m} value={i}>{m}</option>
                         ))}
                     </select>
-                    <button className="today-btn" onClick={onToday}>Today</button>
+
+                    <button className="today-btn" onClick={() => dispatch(goToToday())}>Today</button>
                 </div>
             </div>
 
-            <button className="nav-btn" onClick={onNext}>Next →</button>
+            <div className="nav-right">
+                <button className="nav-btn" onClick={() => dispatch(goToNextMonth())}>Next →</button>
+            </div>
         </div>
     );
 }

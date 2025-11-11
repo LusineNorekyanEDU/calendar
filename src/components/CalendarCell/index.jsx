@@ -1,5 +1,7 @@
+// src/components/CalendarCell/index.jsx
 import React from "react";
 import "./styles.css";
+import { useSelector } from "react-redux";
 
 /**
  * CalendarCell: single square in the month grid.
@@ -7,16 +9,21 @@ import "./styles.css";
  *  - day (number | null)
  *  - hasEvents (boolean)
  *  - onClick
- *  - weekDay (0=Sun..6=Sat)
+ *  - weekDay (0=Sun..6=Sat) used to color weekends
  */
 export default function CalendarCell({ day, hasEvents, onClick, weekDay }) {
-    const today = new Date();
-    const isToday =
-        day &&
-        today.getFullYear() === today.getFullYear() &&
-        today.getDate() === day &&
-        today.getMonth() === new Date().getMonth();
+    const calendarState = useSelector((s) => s.calendar);
+    const displayed = new Date(calendarState.displayedDateIso);
+    const displayedYear = displayed.getFullYear();
+    const displayedMonth = displayed.getMonth();
 
+    const today = new Date();
+    const isSameYear = displayedYear === today.getFullYear();
+    const isSameMonth = displayedMonth === today.getMonth();
+
+    const isToday = day && isSameYear && isSameMonth && today.getDate() === day;
+
+    // Decide cell class
     const classes = ["cell"];
     if (!day) classes.push("empty");
     if (weekDay === 0) classes.push("sunday");

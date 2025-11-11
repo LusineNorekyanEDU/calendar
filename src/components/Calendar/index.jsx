@@ -1,84 +1,29 @@
+// src/components/Calendar/index.jsx
 import React from "react";
 import CalendarHeader from "../CalendarHeader";
 import CalendarGrid from "../CalendarGrid";
 import DayModal from "../DayModal";
-import { useCalendar } from "./hooks/useCalendar";
-import { formatDateKey } from "./utils";
 import "./styles.css";
+import { useSelector } from "react-redux";
+import { formatDateKey } from "./utils";
 
 export default function Calendar() {
-    const {
-        displayedDate,
-        incomingDate,
-        animationDirection,
-        isAnimating,
-        modalOpen,
-        modalDate,
-        events,
-        goToPreviousMonth,
-        goToNextMonth,
-        goToSpecificMonth,
-        goToToday,
-        openModalForDay,
-        closeModal,
-        addEvent,
-        deleteEvent
-    } = useCalendar();
+    const calendarState = useSelector((s) => s.calendar);
+    const displayedDate = new Date(calendarState.displayedDateIso);
 
     return (
         <div className="calendar-root">
-            <CalendarHeader
-                month={displayedDate.getMonth()}
-                year={displayedDate.getFullYear()}
-                onPrev={goToPreviousMonth}
-                onNext={goToNextMonth}
-                onSelectMonth={goToSpecificMonth}
-                onToday={goToToday}
-            />
+            <CalendarHeader />
 
             <div className="calendar-viewport">
-                <div
-                    className={`calendar-panel ${
-                        isAnimating
-                            ? `animating ${
-                                animationDirection === "left" ? "slide-left" : "slide-right"
-                            }`
-                            : ""
-                    }`}
-                    key={`displayed-${displayedDate.getMonth()}-${displayedDate.getFullYear()}`}
-                >
-                    <CalendarGrid
-                        month={displayedDate.getMonth()}
-                        year={displayedDate.getFullYear()}
-                        onDayClick={openModalForDay}
-                        events={events}
-                    />
-                </div>
-
-                {incomingDate && (
-                    <div
-                        className={`calendar-panel incoming ${
-                            animationDirection === "left" ? "incoming-left" : "incoming-right"
-                        }`}
-                        key={`incoming-${incomingDate.getMonth()}-${incomingDate.getFullYear()}`}
-                    >
-                        <CalendarGrid
-                            month={incomingDate.getMonth()}
-                            year={incomingDate.getFullYear()}
-                            onDayClick={openModalForDay}
-                            events={events}
-                        />
-                    </div>
-                )}
+                <CalendarGrid />
             </div>
 
-            {modalOpen && modalDate && (
+            {calendarState.modalOpen && calendarState.modalDateIso && (
                 <DayModal
-                    date={modalDate}
-                    events={events?.[formatDateKey(modalDate)] || []}
-                    onClose={closeModal}
-                    onAdd={(text) => addEvent(modalDate, text)}
-                    onDelete={(id) => deleteEvent(modalDate, id)}
+                    // DayModal will read modalDate and events directly from store,
+                    // but pass format util for getting events key if needed.
+                    formatKey={formatDateKey}
                 />
             )}
         </div>
