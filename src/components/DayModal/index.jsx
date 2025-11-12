@@ -2,8 +2,10 @@
 import React, { useState } from "react";
 import "./styles.css";
 import { useSelector, useDispatch } from "react-redux";
-import { addEvent, deleteEvent, closeModal } from "../../store/calendarSlice";
+//import { addEvent, deleteEvent, closeModal } from "../../store/calendarSlice";
 import { formatDateKey } from "../Calendar/utils";
+import { addEventToServer, deleteEventFromServer, closeModal } from "../../store/calendarSlice";
+
 
 function niceDate(date) {
     return date.toLocaleDateString(undefined, {
@@ -27,14 +29,16 @@ export default function DayModal() {
     const handleAdd = () => {
         const trimmed = text.trim();
         if (!trimmed || !modalDateIso) return;
-        dispatch(addEvent(modalDateIso, trimmed));
+        dispatch(addEventToServer(trimmed, modalDateIso));
+
         setText("");
     };
 
     const handleDelete = (id) => {
         if (!modalDateIso) return;
-        dispatch(deleteEvent(modalDateIso, id));
+        dispatch(deleteEventFromServer(modalDateIso, id));
     };
+
 
     if (!modalDate) return null;
 
