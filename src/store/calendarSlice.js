@@ -1,22 +1,13 @@
 // src/store/calendarSlice.js
 import { createSlice } from "@reduxjs/toolkit";
-import { formatDateKey, loadEvents, saveEvents } from "../components/Calendar/utils";
+import {
+    formatDateKey,
+    loadEvents,
+    saveEvents
+} from "../components/Calendar/utils";
 
-/**
- * State shape:
- * {
- *   displayedDateIso: "YYYY-MM-DDT00:00:00.000Z"  // first day of displayed month
- *   incomingDateIso: null | ISO,
- *   animationDirection: null | "left"|"right",
- *   isAnimating: boolean,
- *   modalOpen: boolean,
- *   modalDateIso: null | ISO,
- *   events: { "YYYY-MM-DD": [ {id, text, createdAt}, ... ], ... }
- * }
- */
 const API_URL = "http://localhost:5000/events";
 
-// --- Thunks for backend sync ---
 export const fetchEventsFromServer = () => async (dispatch) => {
     try {
         const res = await fetch(API_URL);
@@ -29,15 +20,20 @@ export const fetchEventsFromServer = () => async (dispatch) => {
 
 export const addEventToServer = (text, dateIso) => async (dispatch) => {
     try {
-        const normalizedDate = dateIso.length > 10 ? dateIso.split("T")[0] : dateIso;
+        const normalizedDate =
+            dateIso.length > 10 ? dateIso.split("T")[0] : dateIso;
+
         const res = await fetch(API_URL, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ text, date: normalizedDate })
-    });
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ text, date: normalizedDate }),
+        });
+
         const data = await res.json();
+
         if (res.ok) {
-            dispatch(addEventToState({ dateIso: normalizedDate, text }));
+            // Uses the real server event
+            dispatch(addEventFromServer(data.event));
         } else {
             console.error(data.error);
         }
@@ -46,17 +42,36 @@ export const addEventToServer = (text, dateIso) => async (dispatch) => {
     }
 };
 
-
 export const deleteEventFromServer = (dateIso, id) => async (dispatch) => {
     try {
         const res = await fetch(`${API_URL}/${id}`, { method: "DELETE" });
-        if (res.ok) {
-            dispatch(deleteEventFromState({ dateIso, id }));
-        }
+        if (res.ok) dispatch(deleteEventFromState({ dateIso, id }));
     } catch (err) {
         console.error("Failed to delete event:", err);
     }
 };
+
+
+export const updateEventOnServer = (id, updates) => async (dispatch) => {
+    try {
+        const res = await fetch(`${API_URL}/${id}`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updates),
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+            dispatch(updateEventInState(data.event));
+        } else {
+            console.error(data.error);
+        }
+    } catch (err) {
+        console.error("Failed to update event:", err);
+    }
+};
+
 
 const initialDisplayedDate = (() => {
     const now = new Date();
@@ -71,14 +86,14 @@ const initialState = {
     isAnimating: false,
     modalOpen: false,
     modalDateIso: null,
-    events: loadEvents()
+    events: loadEvents(),
 };
 
 const calendarSlice = createSlice({
     name: "calendar",
     initialState,
     reducers: {
-        // animation lifecycle
+
         setIncomingDateIso(state, action) {
             state.incomingDateIso = action.payload;
         },
@@ -95,7 +110,7 @@ const calendarSlice = createSlice({
             state.isAnimating = false;
         },
 
-        // modal
+
         openModalForIso(state, action) {
             state.modalDateIso = action.payload;
             state.modalOpen = true;
@@ -105,73 +120,91 @@ const calendarSlice = createSlice({
             state.modalDateIso = null;
         },
 
-        // events
-        addEventToState(state, action) {
-            // payload: { dateIso, text }
-            const { dateIso, text } = action.payload;
 
-            // If dateIso is already a "YYYY-MM-DD" date-only string, use it directly as key.
-            // Otherwise create a Date and format it.
-            let key;
-            if (typeof dateIso === "string" && dateIso.length === 10 && dateIso[4] === "-") {
-                key = dateIso;
-            } else {
-                const d = new Date(dateIso);
-                key = formatDateKey(d);
+
+        // Used when fetching from server
+        setEventsFromServer(state, action) {
+            const newEventsMap = {};
+
+            for (const ev of action.payload) {
+                const key = formatDateKey(ev.date);
+                if (!newEventsMap[key]) newEventsMap[key] = [];
+                newEventsMap[key].push(ev);
             }
+
+            state.events = newEventsMap;
+            saveEvents(state.events);
+        },
+
+        // Used when POST creates a new event on server
+        addEventFromServer(state, action) {
+            const ev = action.payload;
+            const key = formatDateKey(ev.date);
 
             const list = state.events[key] ? [...state.events[key]] : [];
-            // Use server-generated id when available? We'll keep Date.now() for client-added local id.
-            list.push({ id: Date.now(), text, createdAt: new Date().toISOString() });
-            state.events = { ...state.events, [key]: list };
+            list.push(ev);
 
-            // persist
+            state.events = { ...state.events, [key]: list };
             saveEvents(state.events);
         },
-
 
         deleteEventFromState(state, action) {
-            // payload: { dateIso, id }
             const { dateIso, id } = action.payload;
 
-            let key;
-            if (typeof dateIso === "string" && dateIso.length === 10 && dateIso[4] === "-") {
-                key = dateIso;
-            } else {
-                const d = new Date(dateIso);
-                key = formatDateKey(d);
-            }
+            const key =
+                dateIso.length === 10 ? dateIso : formatDateKey(dateIso);
 
-            const list = (state.events[key] || []).filter((ev) => ev.id !== id);
-            const copy = { ...state.events };
-            if (list.length) copy[key] = list;
-            else delete copy[key];
-            state.events = copy;
+            const list = (state.events[key] || []).filter((e) => e.id !== id);
 
-            // persist
+            const newMap = { ...state.events };
+            if (list.length) newMap[key] = list;
+            else delete newMap[key];
+
+            state.events = newMap;
             saveEvents(state.events);
         },
 
+        /*
+           NEW: UPDATE EVENT LOCALLY
+           Moves between dates if needed.
+            */
+        updateEventInState(state, action) {
+            const ev = action.payload;
 
-        // direct setter (used by finalize)
+            // Find current date key
+            const oldKey = Object.keys(state.events).find((d) =>
+                state.events[d].some((x) => x.id === ev.id)
+            );
+
+            const newKey = formatDateKey(ev.date);
+
+            // Remove from old
+            if (oldKey) {
+                state.events[oldKey] = state.events[oldKey].filter(
+                    (x) => x.id !== ev.id
+                );
+                if (state.events[oldKey].length === 0) {
+                    delete state.events[oldKey];
+                }
+            }
+
+            // Add to new date
+            if (!state.events[newKey]) state.events[newKey] = [];
+            state.events[newKey].push(ev);
+
+            saveEvents(state.events);
+        },
+
+        // internal
         setDisplayedDateIso(state, action) {
             state.displayedDateIso = action.payload;
         },
-        setEventsFromServer(state, action) {
-            const newEventsMap = {};
-            for (const ev of action.payload) {
-                const dateKey = formatDateKey(ev.date); // safe, timezones handled
-                if (!newEventsMap[dateKey]) newEventsMap[dateKey] = [];
-                newEventsMap[dateKey].push(ev);
-            }
-            state.events = newEventsMap;
-            saveEvents(state.events);
-        }
-
-
-
-    }
+    },
 });
+
+/*
+   ACTION EXPORTS
+   */
 
 export const {
     setIncomingDateIso,
@@ -180,52 +213,82 @@ export const {
     finalizeDisplayedDateIso,
     openModalForIso,
     closeModal,
-    addEventToState,
-    deleteEventFromState,
     setEventsFromServer,
-    setDisplayedDateIso
+    addEventFromServer,
+    deleteEventFromState,
+    updateEventInState,
+    setDisplayedDateIso,
 } = calendarSlice.actions;
 
+/*
+   SELECTORS
+    */
 
-// Thunk helpers (not in slice) — exported functions that dispatch multiple actions and handle timeouts
+export const selectCalendarState = (state) => state.calendar;
+
+export const selectDisplayedDateIso = (state) =>
+    state.calendar.displayedDateIso;
+
+export const selectIncomingDateIso = (state) =>
+    state.calendar.incomingDateIso;
+
+export const selectModalOpen = (state) => state.calendar.modalOpen;
+
+export const selectModalDateIso = (state) => state.calendar.modalDateIso;
+
+export const selectEvents = (state) => state.calendar.events;
+
+export const selectAnimationDirection = (state) =>
+    state.calendar.animationDirection;
+
+export const selectIsAnimating = (state) => state.calendar.isAnimating;
+
+/*
+   COMPLEX THUNKS — Animation & Modal Helpers
+    */
+
 export const changeMonthAnimated =
-    (newDate, direction) =>
-        (dispatch) => {
-            const newIso = new Date(newDate.getFullYear(), newDate.getMonth(), 1).toISOString();
-            dispatch(setIncomingDateIso(newIso));
-            dispatch(setAnimationDirection(direction));
-            dispatch(setIsAnimating(true));
+    (newDate, direction) => (dispatch) => {
+        const newIso = new Date(
+            newDate.getFullYear(),
+            newDate.getMonth(),
+            1
+        ).toISOString();
 
-            const totalMs = 300; // must match CSS animation duration
-            setTimeout(() => {
-                dispatch(finalizeDisplayedDateIso(newIso));
-            }, totalMs);
-        };
+        dispatch(setIncomingDateIso(newIso));
+        dispatch(setAnimationDirection(direction));
+        dispatch(setIsAnimating(true));
 
-// convenience thunks
+        setTimeout(() => {
+            dispatch(finalizeDisplayedDateIso(newIso));
+        }, 300);
+    };
+
 export const goToPreviousMonth = () => (dispatch, getState) => {
-    const state = getState().calendar;
-    const displayed = new Date(state.displayedDateIso);
-    const year = displayed.getFullYear();
-    const month = displayed.getMonth();
-    dispatch(changeMonthAnimated(new Date(year, month - 1, 1), "right"));
+    const displayed = new Date(getState().calendar.displayedDateIso);
+    dispatch(
+        changeMonthAnimated(
+            new Date(displayed.getFullYear(), displayed.getMonth() - 1, 1),
+            "right"
+        )
+    );
 };
 
 export const goToNextMonth = () => (dispatch, getState) => {
-    const state = getState().calendar;
-    const displayed = new Date(state.displayedDateIso);
-    const year = displayed.getFullYear();
-    const month = displayed.getMonth();
-    dispatch(changeMonthAnimated(new Date(year, month + 1, 1), "left"));
+    const displayed = new Date(getState().calendar.displayedDateIso);
+    dispatch(
+        changeMonthAnimated(
+            new Date(displayed.getFullYear(), displayed.getMonth() + 1, 1),
+            "left"
+        )
+    );
 };
 
 export const goToSpecificMonth = (monthIndex) => (dispatch, getState) => {
-    const state = getState().calendar;
-    const displayed = new Date(state.displayedDateIso);
-    const year = displayed.getFullYear();
+    const displayed = new Date(getState().calendar.displayedDateIso);
     dispatch(
         changeMonthAnimated(
-            new Date(year, monthIndex, 1),
+            new Date(displayed.getFullYear(), monthIndex, 1),
             monthIndex < displayed.getMonth() ? "right" : "left"
         )
     );
@@ -233,27 +296,26 @@ export const goToSpecificMonth = (monthIndex) => (dispatch, getState) => {
 
 export const goToToday = () => (dispatch) => {
     const now = new Date();
-    dispatch(changeMonthAnimated(new Date(now.getFullYear(), now.getMonth(), 1), "left"));
+    dispatch(
+        changeMonthAnimated(
+            new Date(now.getFullYear(), now.getMonth(), 1),
+            "left"
+        )
+    );
 };
 
 export const openModalForDay = (dayNumber) => (dispatch, getState) => {
     if (!dayNumber) return;
-    const state = getState().calendar;
-    const displayed = new Date(state.displayedDateIso);
-    const year = displayed.getFullYear();
-    const month = displayed.getMonth();
-    // ✅ use local date-only string to avoid timezone shift
-    const localDate = `${year}-${String(month + 1).padStart(2, "0")}-${String(dayNumber).padStart(2, "0")}`;
+    const displayed = new Date(getState().calendar.displayedDateIso);
+
+    const y = displayed.getFullYear();
+    const m = displayed.getMonth() + 1;
+
+    const localDate = `${y}-${String(m).padStart(2, "0")}-${String(
+        dayNumber
+    ).padStart(2, "0")}`;
+
     dispatch(openModalForIso(localDate));
-};
-
-
-export const addEvent = (dateIso, text) => (dispatch) => {
-    dispatch(addEventToState({ dateIso, text }));
-};
-
-export const deleteEvent = (dateIso, id) => (dispatch) => {
-    dispatch(deleteEventFromState({ dateIso, id }));
 };
 
 export default calendarSlice.reducer;

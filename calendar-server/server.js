@@ -83,6 +83,31 @@ app.delete("/events/:id", (req, res) => {
     saveEvents(eventsStore);
     res.json({ message: "Event deleted successfully" });
 });
+// --- PATCH: update event by ID ---
+app.patch("/events/:id", (req, res) => {
+  const { id } = req.params;
+  const { text, date } = req.body;
+
+  let event = eventsStore.data.find((ev) => ev.id === id);
+  if (!event) {
+    return res.status(404).json({ error: "Event not found" });
+  }
+
+  if (text !== undefined) event.text = text;
+
+  if (date !== undefined) {
+    const normalizedDate =
+      date.length > 10 ? date.split("T")[0] : date;
+    event.date = normalizedDate;
+  }
+
+  event.updatedAt = new Date().toISOString();
+
+  saveEvents(eventsStore);
+
+  res.json({ message: "Event updated successfully", event });
+});
+
 
 // Start server
 app.listen(PORT, () => {
