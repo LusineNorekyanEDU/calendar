@@ -1,17 +1,12 @@
 {
   "id": "calendar-events",
-  "data": [
-    {
-      "id": "d0502d9e-45ad-4a9f-ad4b-4e17d7c9c557",
-      "text": "bbbb",
-      "date": "2025-11-10T20:00:00.000Z",
-      "createdAt": "2025-11-11T09:57:29.854Z"
-    },
+  "events": [
     {
       "id": "d1b3e761-2d06-4e6a-aa04-f40fd7fdb9fd",
       "text": "ssssss",
       "date": "2025-11-19T20:00:00.000Z",
-      "createdAt": "2025-11-11T09:57:36.921Z"
+      "createdAt": "2025-11-11T09:57:36.921Z",
+      "categoryId": "work-1"
     },
     {
       "id": "17a9135b-8e97-48a3-a874-94633f7cc34b",
@@ -20,41 +15,41 @@
       "createdAt": "2025-11-11T09:58:17.017Z"
     },
     {
-      "id": "5d86a83d-92a1-4b51-9860-6b34b196a26c",
-      "text": "awawawa",
-      "date": "2025-11-10T20:00:00.000Z",
-      "createdAt": "2025-11-11T10:00:57.762Z"
-    },
-    {
       "id": "c4880aa7-6122-4d37-b1d0-5c7ad571702a",
       "text": "vvvvv",
       "date": "2025-11-12T20:00:00.000Z",
-      "createdAt": "2025-11-11T10:01:14.132Z"
+      "createdAt": "2025-11-11T10:01:14.132Z",
+      "categoryId": "work-1"
     },
     {
       "id": "d768862b-69db-41fa-b8e7-1b249cde8242",
       "text": "aaa",
       "date": "2025-11-10",
       "createdAt": "2025-11-11T10:08:51.783Z",
-      "updatedAt": "2025-11-21T09:50:49.906Z"
+      "updatedAt": "2025-11-24T09:14:42.449Z",
+      "categoryId": "work-1"
     },
     {
       "id": "f179c084-59cc-4ffe-8706-45a08e7316bf",
       "text": "sssss",
       "date": "2025-11-10",
-      "createdAt": "2025-11-11T10:08:56.903Z"
+      "createdAt": "2025-11-11T10:08:56.903Z",
+      "categoryId": "home-1",
+      "updatedAt": "2025-11-24T09:13:34.959Z"
     },
     {
       "id": "bbb487bd-1722-4327-8e7e-15b46da56b0d",
       "text": "aaaaaa",
       "date": "2025-11-03",
-      "createdAt": "2025-11-11T10:15:47.685Z"
+      "createdAt": "2025-11-11T10:15:47.685Z",
+      "categoryId": "school-1"
     },
     {
       "id": "c63db312-7105-4b76-91e6-d32f7c865229",
       "text": "aaaaa",
       "date": "2025-11-28",
-      "createdAt": "2025-11-12T08:25:31.544Z"
+      "createdAt": "2025-11-12T08:25:31.544Z",
+      "categoryId": "home-1"
     },
     {
       "id": "d3b02050-6270-4838-9314-19c56f329d74",
@@ -66,7 +61,8 @@
       "id": "6abc8f13-319e-466d-8815-c4390a863896",
       "text": "calc",
       "date": "2025-11-15",
-      "createdAt": "2025-11-12T08:47:03.295Z"
+      "createdAt": "2025-11-12T08:47:03.295Z",
+      "categoryId": "school-1"
     },
     {
       "id": "0ffaaa90-9824-4cb4-8ebe-5cb1cbc18c8c",
@@ -78,7 +74,96 @@
       "id": "1f56c8ff-bfc3-4125-9ffc-73ddb03ac1f2",
       "text": "bbb",
       "date": "2025-11-10",
-      "createdAt": "2025-11-21T09:51:10.143Z"
+      "createdAt": "2025-11-21T09:51:10.143Z",
+      "categoryId": "school-1",
+      "updatedAt": "2025-11-24T09:13:30.211Z"
+    },
+    {
+      "id": "73db48c2-4ce1-46cc-a76a-0aaccdd49a4d",
+      "text": "gggggggg",
+      "date": "2025-11-11",
+      "categoryId": "work-1",
+      "createdAt": "2025-11-24T09:03:54.364Z",
+      "updatedAt": "2025-11-24T09:04:07.390Z"
+    },
+    {
+      "id": "04d68a1b-052d-42d2-946c-d3542053d498",
+      "text": "wwww",
+      "date": "2025-11-11",
+      "categoryId": "work-1",
+      "createdAt": "2025-11-24T09:04:47.120Z"
+    },
+    {
+      "id": "38720853-a478-4589-8e8c-0e18d95b0e37",
+      "text": "eeeeeeeee",
+      "date": "2025-11-10",
+      "categoryId": "21585103-d897-4ca6-b70e-ad5cddd53dd6",
+      "createdAt": "2025-11-24T09:14:25.937Z"
+    },
+    {
+      "id": "0ca378bc-462d-46b2-9265-0021704dca1c",
+      "text": "lll",
+      "date": "2025-11-20",
+      "categoryId": "734ca655-baa7-48c7-b5f4-0a9d28c99866",
+      "createdAt": "2025-11-24T09:16:34.768Z"
+    },
+    {
+      "id": "dcc44807-bd0a-40ce-be66-7e277faac475",
+      "text": "uiiai",
+      "date": "2025-11-24",
+      "categoryId": "2e72b455-65d9-4b33-a457-ede06081deea",
+      "createdAt": "2025-11-24T09:18:06.251Z"
+    },
+    {
+      "id": "99494eed-6c71-4190-94a2-9220aaf114ca",
+      "text": "www",
+      "date": "2025-11-13",
+      "categoryId": "home-1",
+      "createdAt": "2025-11-24T09:19:14.993Z"
+    },
+    {
+      "id": "4e4ca4aa-ee90-4ac5-b38d-3e515461f8bf",
+      "text": "sss",
+      "date": "2025-11-24",
+      "categoryId": "5527c60d-3f4c-4833-b354-a6059c94dd38",
+      "createdAt": "2025-11-24T09:20:20.286Z"
+    }
+  ],
+  "categories": [
+    {
+      "id": "work-1",
+      "name": "work",
+      "color": "#0438f6"
+    },
+    {
+      "id": "school-1",
+      "name": "school",
+      "color": "#F54291"
+    },
+    {
+      "id": "home-1",
+      "name": "home",
+      "color": "#DB6575"
+    },
+    {
+      "id": "21585103-d897-4ca6-b70e-ad5cddd53dd6",
+      "name": "hobbies",
+      "color": "#fffa6b"
+    },
+    {
+      "id": "734ca655-baa7-48c7-b5f4-0a9d28c99866",
+      "name": "lll",
+      "color": "#3fca56"
+    },
+    {
+      "id": "2e72b455-65d9-4b33-a457-ede06081deea",
+      "name": "uiiai",
+      "color": "#6bfdff"
+    },
+    {
+      "id": "5527c60d-3f4c-4833-b354-a6059c94dd38",
+      "name": "aaaaa",
+      "color": "#ff00d0"
     }
   ]
 }

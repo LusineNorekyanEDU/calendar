@@ -46,3 +46,29 @@
     background: var(--event-dot);
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
 }
+.event-dots {
+    display: flex;
+    gap: 3px;
+    margin-top: 4px;
+    justify-content: center;
+}
+
+.dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+/* Default icon dot (no category) */
+.dot-icon {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #ccc;       /* background for icon */
+    color: #333;
+    font-size: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}

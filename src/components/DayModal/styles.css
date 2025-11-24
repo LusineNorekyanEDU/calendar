@@ -8,7 +8,7 @@
     z-index: 999;
 }
 .modal {
-    width: 520px;
+    width: 620px;
     max-width: 90vw;
     background: white;
     border-radius: 8px;
@@ -93,3 +93,27 @@
     border-radius: 6px;
     cursor: pointer;
 }
+.create-category-box {
+    margin-top: 14px;
+    padding: 10px;
+    border: 1px solid #eaeaea;
+    border-radius: 6px;
+    background: #fafafa;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.create-cat-btn {
+    background: #6c8cff;
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.create-cat-btn:disabled {
+    background: #a8b3d6;
+    cursor: not-allowed;
+}
+

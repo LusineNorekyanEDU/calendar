@@ -41,14 +41,14 @@ export default function CalendarGrid() {
       <div className="cells">
         {cells.map((day, i) => {
           const key = day ? formatDateKeyFromParts(year, month, day) : `empty-${i}`;
-          const hasEvents = day ? !!events[key] : false;
+          const eventsForDay = day ? events[key] || [] : [];
           const weekDay = (i + firstDayIndex) % 7;
 
           return (
             <CalendarCell
               key={key}
               day={day}
-              hasEvents={hasEvents}
+              eventsForDay={eventsForDay}
               onClick={() => dispatch(openModalForDay(day))}
               weekDay={weekDay}
             />
